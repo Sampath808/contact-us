@@ -1,19 +1,50 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
+const functions = require("firebase-functions");
+const admin = require("firebase-admin");
+const nodemailer = require("nodemailer");
 
-const {onRequest} = require("firebase-functions/v2/https");
-const logger = require("firebase-functions/logger");
+admin.initializeApp();
+const db = admin.firestore();
 
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
+// Configure Nodemailer transport using SMTP (or replace with your email service)
+const transporter = nodemailer.createTransport({
+  service: "gmail", // You can use other services like Outlook, Yahoo, etc.
+  auth: {
+    user: "srisuryakumar808@gmail.com",
+    pass: "ehhj yltn ebzk bxdz", // Use environment variables for security
+  },
+});
 
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+exports.saveFormAndSendEmail = functions.https.onRequest(async (req, res) => {
+  try {
+    res.set("Access-Control-Allow-Origin", "*");
+    const formData = req.body;
+
+    // Save form data to Firestore or Realtime Database
+    const docRef = await db.collection("forms").add(formData);
+
+    // Prepare email data
+    const mailOptions = {
+      from: "srisuryakumar808@gmail.com",
+      to: "sampathsrikakulapu@gmail.com", // Replace with the recipient's email
+      subject: "New Form Submission",
+      text: `Form Data : ${JSON.stringify(formData)}`,
+    };
+
+    // Send email
+    await transporter.sendMail(mailOptions);
+
+    res
+      .status(200)
+      .send(`Form saved with ID: ${docRef.id} and email sent successfully.`);
+  } catch (error) {
+    console.error("Error saving form or sending email:", error);
+    res
+      .status(500)
+      .send("Error saving form or sending email" + JSON.stringify(error));
+  }
+});
+
+exports.testApi = functions.https.onRequest(async (req, res) => {
+  res.set("Access-Control-Allow-Origin", "*");
+  res.status(200).send("Hello world123!!");
+});
