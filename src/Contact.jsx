@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Card from "react-bootstrap/Card";
+import axios from "axios";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -19,14 +20,19 @@ const Contact = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const contactRef = ref(database, "contactus");
-      await push(contactRef, formData);
+      // Make sure you're sending JSON data with the correct header
+      const response = await axios.post(
+        "https://us-central1-contact-us-387f1.cloudfunctions.net/saveFormAndSendEmail",
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json", // Explicitly set the content type
+          },
+        }
+      );
+
+      console.log("Form submitted successfully:", response.data);
       alert("Message sent successfully!");
-      setFormData({
-        name: "",
-        email: "",
-        message: "",
-      });
     } catch (error) {
       console.error("Error saving contact information:", error);
       alert("Failed to send message. Please try again later.");
