@@ -89,12 +89,6 @@ exports.getFormSubmissions = functions.https.onRequest((req, res) => {
           return res.status(405).send("Method Not Allowed");
         }
 
-        const express = require("express");
-        const cors = require("cors");
-        const app = express();
-
-        app.use(cors({ origin: "http://localhost:5173" }));
-
         const formSubmissionsRef = db.collection("forms");
         const snapshot = await formSubmissionsRef.get();
 
@@ -110,7 +104,7 @@ exports.getFormSubmissions = functions.https.onRequest((req, res) => {
       }
     },
     {
-      cors: false, // Disable CORS
+      cors: false,
     }
   );
 });
